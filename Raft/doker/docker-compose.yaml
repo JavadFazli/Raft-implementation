@@ -1,0 +1,35 @@
+version: '3.8'
+
+services:
+  raft_node:
+    build: .  # Build the Docker image from the current directory
+    container_name: raft_node_1  # Set the container's name
+    ports:
+      - "50051:50051"  # gRPC port for communication with other nodes
+    depends_on:
+      - redis
+      - mongo
+    environment:
+      - NODE_ID=node_1
+      - GRPC_PORT=50051
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - MONGO_URI=mongodb://mongo:27017
+      - MONGO_DB_NAME=raft_db
+
+  redis:
+    image: redis:latest  # Use the latest Redis image
+    container_name: redis
+    ports:
+      - "6379:6379"  # Default Redis port
+
+  mongo:
+    image: mongo:latest  # Use the latest MongoDB image
+    container_name: mongo
+    ports:
+      - "27017:27017"  # Default MongoDB port
+    volumes:
+      - mongo_data:/data/db  # Persistent storage for MongoDB
+
+volumes:
+  mongo_data:  # Define a named volume for MongoDB persistence
