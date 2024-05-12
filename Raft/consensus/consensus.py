@@ -4,6 +4,8 @@ from queue import Queue
 from state.follower_state import Follower_state
 from state.candidate_state import Condidate_state
 from state.leader_state import Leader_state
+from state.state import State
+import json 
 
 class Consensus:
     
@@ -18,8 +20,10 @@ class Consensus:
         self.last_log_term = -1 # save last index and term in receive TODO
         self.last_log_id = -1
         self.number_of_nodes = 3
+        self.commit_index = 0
+        self.last_applied = 0
         
-    def __handler(signum, frame):
+    def __handler(self, signum, frame):
         print('Signal handler called with signal', signum) # Test
         self.__reset_timeout()
         self.set_state("Candidate")
@@ -33,18 +37,20 @@ class Consensus:
             if len(self.receive_queue) != 0:
                 
                 message = null # TODO reciever
-                content = message.spilt("#")
                 
-                if content[0] == "Append Entries":
+                if message["kind"] == "Append Entries":
                     self.__reset_timeout()
-                    self.state.receive_append_entries(content)
+                    self.state.receive_append_entries(message)
                     
-                elif content[0] == "Request Vote":
+                elif message["kind"] == "Request Vote":
                     self.__reset_timeout()
-                    self.state.receive_request_vote(content)
+                    self.state.receive_request_vote(message)
                     
-                elif content[0] == "Answer":
-                    self.state.receive_answer(content)
+                elif message["kind"] == "Answer":
+                    self.state.receive_answer(message)
+                    
+                elif message["kind"] == "Client":
+                    self.state.receive_client_message(message)
                 
                 else:
                     # TODO rise exception
@@ -52,8 +58,9 @@ class Consensus:
                 
          
     def __reset_timeout(self):
-        timeout = random.randint(150, 300)/1000
-        signal.setitimer(signal.ITIMER_REAL, timeout) #WHERE IS HANDLER??? TODO
+        timeout = random.randint(7, 14)
+        signal.signal(signal.SIGALRM, self.__handler)
+        signal.alarm(timeout)
     
     def set_state(self, kind):
         
@@ -70,10 +77,12 @@ class Consensus:
             pass
         self.state.start()
         
-    def send_message(self, message):
+    def send_message(self, message: dict):
+        string_message = json.dumps(message, indent=4)
         pass
     
     def receive_message(self):
+        # dictionary_message = json.loads(jsonString)
         pass
                 
                 

@@ -1,6 +1,7 @@
-from consensus import Consensus
+import threading
+from state import State
 
-class State: 
+class Follower_state(State, threading.Thread):
     
     def __init__(self, consensus: Consensus):
         
@@ -18,22 +19,12 @@ class State:
     def receive_answer(self, message):
         pass
     
-    def receive_client_message(self, message):
-        pass
-    
     def send_request_vote(self):
         pass
     
-    def send_append_entries(self, entries: list):
+    def send_append_entries(self):
         pass
     
     def send_answer(self):
-            
-        messsage = {}
-        message["kind"] = "Answer"
-        message["Answer"] = answer
-        message["term"] = self.consensus.term
-        message["Id"] = self.consensus.id
-            
-        self.consensus.send_message(message)
-    
+        pass
+
