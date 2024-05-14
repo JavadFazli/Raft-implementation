@@ -1,11 +1,10 @@
 
 import threading
-from state import State
-from consensus import Consensus
+from Raft.consensus.state.state import State
 
 class Condidate_state(State, threading.Thread):
     
-    def __init__(self, consensus: Consensus):
+    def __init__(self, consensus):
         self.vote = []
         self.consensus = consensus
         threading.Thread.__init__(self)
@@ -14,25 +13,23 @@ class Condidate_state(State, threading.Thread):
     def run(self):
     
         self.vote.append(self.consensus.id)
-        
         # TODO send paraller
     
     def receive_request_vote(self, message): 
         self.send_answer("Reject")
     
-    def receive_append_entries(self, message):
+    def receive_append_entries(self, message, destination_id):
         
         # How about the message has log?
         if message["term"] >= self.consensus.term: # TODO also last index and term
             # changing voted for
             self.consensus.voted_for = message["term"]
-            self.send_answer("Accept")
-            # TODO check log
+            self.send_append_entries_answer("Accept", message["id"])
             self.consensus.set_state("Follower")
         else:
-            self.send_answer("Reject")
-        
-    def receive_answer(self, message):
+            self.send_append_entries_answer("Reject", message["id"])
+            
+    def receive_request_vote_answer(self, message):
         
         if message["Answer"] == "Accept":
             
@@ -43,22 +40,24 @@ class Condidate_state(State, threading.Thread):
                 self.consensus.set_state("Leader")
                 
         elif message["term"] > self.consensus.current_term:
-            # TODO update term?
-            pass
+            
+            self.consensus.current_term = message["term"]
+    
+    def receive_append_entries_answer(self, message):
+        # TODO rise exception
+        pass
         
     def receive_client_message(self, message):
         # TODO rise exception
         pass
             
-    
     def send_request_vote(self):
         message = {}
-        message["kind"] = "Request Vote"
         message["term"] = self.consensus.term
         message["id"]  = self.consensus.id
         message["Last Log Term"] = self.consensus.last_log_term
-        message["Last Log Id"] = self.consensus.last_log_id
-        self.consensus.send_message(message)
+        message["Last Log Id"] = self.consensus.last_log_index
+        self.consensus.send_request_vote(message)
         
     def send_append_entries(self, entries: list):
         # TODO rise exception

@@ -1,8 +1,8 @@
-from consensus import Consensus
+
 
 class State: 
     
-    def __init__(self, consensus: Consensus):
+    def __init__(self, consensus):
         
         self.consensus = consensus
     
@@ -15,7 +15,10 @@ class State:
     def receive_append_entries(self, message):
         pass
     
-    def receive_answer(self, message):
+    def receive_request_vote_answer(self, message):
+        pass
+    
+    def receive_append_entries_answer(self, message):
         pass
     
     def receive_client_message(self, message):
@@ -24,16 +27,28 @@ class State:
     def send_request_vote(self):
         pass
     
-    def send_append_entries(self, entries: list):
+    def send_append_entries(self, entries: list, destination_id):
         pass
-    
-    def send_answer(self):
-            
+      
+    def send_request_vote_answer(self, answer, destination_id):
+        
         messsage = {}
-        message["kind"] = "Answer"
         message["Answer"] = answer
         message["term"] = self.consensus.term
+        message["Destination Id"] = destination_id
         message["Id"] = self.consensus.id
             
-        self.consensus.send_message(message)
+        self.consensus.send_request_vote_answer(message)
+    
+    def send_append_entries_answer(self, answer,  destination_id):
+        
+        messsage = {}
+        message["Answer"] = answer
+        message["term"] = self.consensus.term
+        message["Destination Id"] = destination_id
+        message["Id"] = self.consensus.id
+            
+        self.consensus.send_append_entries_answer(message)
+            
+
     
