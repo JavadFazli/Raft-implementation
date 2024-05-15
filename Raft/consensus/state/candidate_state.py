@@ -26,6 +26,7 @@ class Condidate_state(State, threading.Thread):
             self.consensus.voted_for = message["term"]
             self.send_append_entries_answer("Accept", message["id"])
             self.consensus.set_state("Follower")
+            self.consensus.state.start()
         else:
             self.send_append_entries_answer("Reject", message["id"])
             
@@ -38,9 +39,9 @@ class Condidate_state(State, threading.Thread):
             if len(self.vote) > self.consensus.number_of_nodes/2:
                 
                 self.consensus.set_state("Leader")
+                self.consensus.state.start()
                 
         elif message["term"] > self.consensus.current_term:
-            
             self.consensus.current_term = message["term"]
     
     def receive_append_entries_answer(self, message):

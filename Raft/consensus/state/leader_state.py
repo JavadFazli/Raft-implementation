@@ -7,7 +7,7 @@ class Leader_state(State, threading.Thread):
     def __init__(self, consensus):
         
         self.consensus = consensus
-        self.next_index = np.full(shape=self.consensus.number_of_nodes, fill_value=1+self.consensus.last_log_index, dtype=np.int)
+        self.next_index = np.full(shape=self.consensus.number_of_nodes-1, fill_value=1+self.consensus.last_log_index, dtype=np.int)
         self.match_index = np.zeros(self.consensus.number_of_nodes)
         
         threading.Thread.__init__(self)
@@ -15,7 +15,7 @@ class Leader_state(State, threading.Thread):
         
     
     def run(self):
-        
+         
         for destination_index in range(self.next_index):
             threading.Thread(target=self.send_append_entries, args=("", destination_index)).start()
         
@@ -26,7 +26,17 @@ class Leader_state(State, threading.Thread):
         pass
     
     def receive_append_entries(self, message):
-        
+        # TODO rise exception
+        pass
+                
+    
+    def receive_request_vote_answer(self, message):
+        # TODO rise exception
+        pass
+
+    
+    def receive_append_entries_answer(self, message):
+
         if message["Answer"] == "Accept":
             
             self.next_index[message["Id"]] += 1
@@ -41,29 +51,15 @@ class Leader_state(State, threading.Thread):
             if self.consensus.current_term < message["term"]:
                 
                 self.consensus.set_state("Follower")
+                self.consensus.state.start()
                 
             else:
                 self.next_index[message["Id"]] -= 1
                 self.send_append_entries("get", message["Id"]) #TODO get entry
-                
-    
-    def receive_request_vote_answer(self, message):
-        # TODO rise exception
-        pass
-    
-    def receive_append_entries_answer(self, message):
-
-        if message["Answer"] == "Accept":
-            # TODO and check for commiting
-            pass
-        
-        elif message["Answer"] == "Reject":
-            # TODO
-            pass
             
         
     def receive_client_message(self, message):
-
+        
         self.consensus.last_log_index += 1
         self.consensus.last_log_term = self.consensus.current_term
         self.consensus.log.store(message) # TODO Type of message is considered string
@@ -91,7 +87,6 @@ class Leader_state(State, threading.Thread):
     def __handler(self, signum, frame):
         
         self.__heartbeat()
-
         for destination_index in range(self.next_index):
             threading.Thread(target=self.send_append_entries, args=("", destination_index)).start()
         

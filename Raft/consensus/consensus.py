@@ -13,10 +13,9 @@ class Consensus:
     def __init__(self, id):
         self.id = id
         self.log = Log()
-        self.current_term = 0
-        self.state = Follower_state(self) # TODO out  put of init
-        # self.send_queue = RedisQueue() # queue which subscriber put message in it
-        self.receive_queue = RedisQueue(host='0.0.0.0', port=6379, db=0)
+        self.current_term = 1
+        self.state = Follower_state(self)
+        self.queue = RedisQueue(host='0.0.0.0', port=6379, db=0)
         self.voted_for = None
         self.last_log_term = -1 # save last index and term in receive TODO
         self.last_log_index = -1
@@ -28,12 +27,16 @@ class Consensus:
     def __handler(self, signum, frame):
         print('Signal handler called with signal', signum) # TODO delete Test
         self.__reset_timeout()
+        self.state.join()
         self.set_state("Candidate")
+        self.state.start()
         
     # TODO Listen to its queue
     def start(self):
         
         self.__reset_timeout()
+        self.state.start()
+        
         while(True):
             
             # TODO condition
@@ -43,7 +46,8 @@ class Consensus:
                 
                 if message["kind"] == "Append Entries":
                     self.__reset_timeout()
-                    self.state.receive_append_entries(message)
+                    answer_receive_append_entries = self.state.receive_append_entries(message)
+                    queue.add(answer_receive_append_entries)
                     
                 elif message["kind"] == "Request Vote":
                     self.__reset_timeout()
@@ -82,27 +86,32 @@ class Consensus:
         
     
     def send_request_vote(self, message: dict):
-        pass
+        # x = client.##
+        # self.state.receive_request_vote_answer(x)
+        print("send_request_vote")
     
     def send_append_entries(self, message: dict):
+        # answer_follower_append_entries = client.
+        # self.state.receive_append_entries_answer(answer_follower_append_entries)
         pass
     
     def send_request_vote_answer(self, message: dict):
-        pass
+        print("send_request_vote_answer")
     
     def send_append_entries_answer(self, message: dict):
-        pass 
+        print("send_append_entries_answer") 
 
-    def receive_request_vote(self):
+    def receive_request_vote(self, message: dict):
+        # 
         pass
     
     def receive_append_entries(self):
-        pass
+        print("receive_append_entries")
     
     def receive_request_vote_answer(self):
-        pass
+        print("receive_request_vote_answer")
     
     def receive_append_entries_answer(self):
-        pass
+        print("receive_append_entries_answer")
                 
                 

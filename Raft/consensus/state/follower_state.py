@@ -1,5 +1,6 @@
 import threading
 from Raft.consensus.state.state import State
+import time
 
 class Follower_state(State, threading.Thread):
     
@@ -9,7 +10,6 @@ class Follower_state(State, threading.Thread):
         threading.Thread.__init__(self)
         State.__init__(self, consensus)
 
-    
     def run(self): 
         pass
     
@@ -31,7 +31,6 @@ class Follower_state(State, threading.Thread):
             self.send_append_entries_answer("Reject", message["id"])
             
         else:
-            
             # Check commit
             if message["Leader Commite"] > self.consensus.commit_index:
                 # TODO delete log
@@ -39,7 +38,6 @@ class Follower_state(State, threading.Thread):
             
             # Heartbeat
             if message["Entries"] == "":
-                
                 self.consensus.voted_for = message["id"]
             
             else:
