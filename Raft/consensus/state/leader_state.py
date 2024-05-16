@@ -78,11 +78,11 @@ class Leader_state(State, threading.Thread):
         message = {}
         message["term"] = self.current_term
         message["id"]  = self.consensus.id
-        message["Destination Id"] = destination_id
-        message["Prev Log Term"] = -1 # TODO
-        message["Prev Log Id"] = -1 # TODO
+        message["Destination_Id"] = destination_id
+        message["Prev_Log_Term"] = -1 # TODO
+        message["Prev_Log_Id"] = -1 # TODO
         message["Entries"] = '#'.join(entries)
-        message["Leader Commite"] = self.consensus.commit_index
+        message["Leader_Commite"] = self.consensus.commit_index
 
         self.consensus.send_append_entries(message)
         

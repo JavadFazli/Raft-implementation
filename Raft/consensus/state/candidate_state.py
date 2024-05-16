@@ -56,8 +56,8 @@ class Condidate_state(State, threading.Thread):
         message = {}
         message["term"] = self.current_term
         message["id"]  = self.consensus.id
-        message["Last Log Term"] = self.consensus.last_log_term
-        message["Last Log Id"] = self.consensus.last_log_index
+        message["Last_Log_Term"] = self.consensus.last_log_term
+        message["Last_Log_Id"] = self.consensus.last_log_index
         self.consensus.send_request_vote(message)
         
     def send_append_entries(self, entries: list):

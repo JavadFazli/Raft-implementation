@@ -35,7 +35,7 @@ class State:
         message = {}
         message["Answer"] = answer
         message["term"] = self.consensus.current_term
-        message["Destination Id"] = destination_id
+        message["Destination_Id"] = destination_id
         message["Id"] = self.consensus.id
             
         self.consensus.send_request_vote_answer(message)
@@ -45,7 +45,7 @@ class State:
         message = {}
         message["Answer"] = answer
         message["term"] = self.consensus.current_term
-        message["Destination Id"] = destination_id
+        message["Destination_Id"] = destination_id
         message["Id"] = self.consensus.id
             
         self.consensus.send_append_entries_answer(message)

@@ -15,7 +15,7 @@ class Follower_state(State, threading.Thread):
     
     def receive_request_vote(self, message): 
         
-        if message["term"] > self.consensus.current_term and message["Last Log Term"] >= self.consensus.last_log_term and message["Last Log Id"] >= self.consensus.last_log_index and self.consensus.voted_for == None:
+        if message["term"] > self.consensus.current_term and message["Last_Log_Term"] >= self.consensus.last_log_term and message["Last_Log_Id"] >= self.consensus.last_log_index and self.consensus.voted_for == None:
             self.consensus.voted_for = message["id"]
             self.send_request_vote_answer("Accept", message["id"])
             self.consensus.current_term = message["term"]
@@ -30,7 +30,7 @@ class Follower_state(State, threading.Thread):
             
         else:
             # Check commit
-            if message["Leader Commite"] > self.consensus.commit_index:
+            if message["Leader_Commite"] > self.consensus.commit_index:
                 # TODO delete log
                 self.consensus.commit_index = message["Leader_Commite"]
             
@@ -43,11 +43,11 @@ class Follower_state(State, threading.Thread):
             else:
                 
                 # Log isn't update
-                if message["Prev Log Term"] == self.consensus.last_log_term and message["Prev Log Id"] != self.consensus.last_log_index:
+                if message["Prev_Log_Term"] == self.consensus.last_log_term and message["Prev_Log_Id"] != self.consensus.last_log_index:
                     self.send_append_entries_answer("Reject", message["id"])
                     return
                     
-                elif message["Prev Log Term"] != self.consensus.last_log_term:
+                elif message["Prev_Log_Term"] != self.consensus.last_log_term:
                     # TODO delete current entry
                     self.send_append_entries_answer("Reject", message["id"])
                     pass
