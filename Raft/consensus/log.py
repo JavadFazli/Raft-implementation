@@ -3,7 +3,7 @@ class Log:
     def __init__(self):
         self.db = MongoDB()  # Initialize MongoDB connection
 
-    def store(self, log_entry , term, index):
+    def store(self, log):
         """
         Store a log entry in MongoDB.
 
@@ -12,11 +12,10 @@ class Log:
         """
         try:
             # Check if a document with the specified term already exists
-            if self.db.get_collection('log').find_one({'index': index}):
+            if self.db.get_collection('log').find_one({'index': log['index']}):
                 raise ValueError("Error: A document with the specified index already exists.")
-            log_document = {"log_entry": log_entry,'term': term,'index':index}  # Create a dictionary representing the log entry
-            self.db.insert_one("log", log_document)
-            # self.db.insert_one("log", log_entry)
+
+            self.db.insert_one("log", log)
             print("Log entry stored successfully.")
         except Exception as e:
             print(f"Error storing log entry: {e}")
@@ -29,7 +28,6 @@ class Log:
             list: List of log entries.
         """
         try:
-            # log_entries = self.db.find_all("log")
             log_entries = self.db.find_all("log")  # Retrieve all log documents from the "log" collection
             # log_entries = [entry["entry"] for entry in log_entries]  # Extract the log entries from the documents
             print("Log entries loaded successfully.")
