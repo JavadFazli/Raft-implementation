@@ -15,7 +15,7 @@ class Consensus:
         self.log = Log()
         self.current_term = 1
         self.state = Follower_state(self)
-        self.queue = RedisQueue(host='0.0.0.0', port=6379, db=0)
+        self.queue = RedisQueue()
         self.voted_for = None
         self.last_log_term = -1 # save last index and term in receive TODO
         self.last_log_index = -1
@@ -33,41 +33,45 @@ class Consensus:
         
     # TODO Listen to its queue
     def start(self):
-        
+        pubsub=self.queue.subscribe('server')
         self.__reset_timeout()
         self.state.start()
-        
-        while(True):
-            
-            # TODO condition
-            if len(self.receive_queue) != 0:
-                
-                message = null # TODO reciever
-                
+        for message in pubsub.listen():
+            if message['type'] == 'message':
+                message = message['data'].decode('utf-8')
+                message = json.loads(message)
+                print(message)
+                # message=message['data']
+                # TODO condition
                 if message["kind"] == "Append Entries":
                     self.__reset_timeout()
-                    answer_receive_append_entries = self.state.receive_append_entries(message)
-                    queue.add(answer_receive_append_entries)
-                    
+                    # TODO error
+                    print('Append')
+                    # answer_receive_append_entries = self.state.receive_append_entries(message)
+                    self.queue.publish('consensus',{'response':"Reject","node_id":1})
+
                 elif message["kind"] == "Request Vote":
+                    self.queue.publish('consensus',{'response':"Accept","node_id":3})
+
                     self.__reset_timeout()
                     self.state.receive_request_vote(message)
-                    
+
                 elif message["kind"] == "Answer":
                     self.state.receive_answer(message)
-                    
+
                 elif message["kind"] == "Client":
                     self.state.receive_client_message(message)
-                
+
                 else:
                     # TODO rise exception
                     pass
                 
          
     def __reset_timeout(self):
-        timeout = random.randint(7, 14)
-        signal.signal(signal.SIGALRM, self.__handler)
-        signal.alarm(timeout)
+        # timeout = random.randint(7, 14)
+        # signal.signal(signal.SIGALRM, self.__handler)
+        # signal.alarm(timeout)
+        pass
     
     def set_state(self, kind):
         

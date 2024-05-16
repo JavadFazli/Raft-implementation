@@ -32,9 +32,9 @@ class State:
       
     def send_request_vote_answer(self, answer, destination_id):
         
-        messsage = {}
+        message = {}
         message["Answer"] = answer
-        message["term"] = self.consensus.term
+        message["term"] = self.consensus.current_term
         message["Destination Id"] = destination_id
         message["Id"] = self.consensus.id
             
@@ -42,9 +42,9 @@ class State:
     
     def send_append_entries_answer(self, answer,  destination_id):
         
-        messsage = {}
+        message = {}
         message["Answer"] = answer
-        message["term"] = self.consensus.term
+        message["term"] = self.consensus.current_term
         message["Destination Id"] = destination_id
         message["Id"] = self.consensus.id
             

@@ -1,30 +1,68 @@
+import json
+
 import grpc
 from concurrent import futures
 import raft_pb2, raft_pb2_grpc  # Import generated gRPC files
 from Raft.consensus.log import Log  # Import Log class from your project
+from Raft.app.config import (Config)
+from Raft.broker.queue import RedisQueue
+from google.protobuf.json_format import MessageToDict
 
 
 class RaftServicer(raft_pb2_grpc.RaftServiceServicer):
     def __init__(self):
         self.log = Log()  # Initialize the Log instance
-
+        self.queue=RedisQueue()
     def RequestVote(self, request, context):
         """
         gRPC method to handle RequestVote RPC.
         Implement the logic to handle vote requests here.
         """
-        # Implement your logic here (e.g., send vote response based on node's state)
-        # For demonstration purposes, we'll simply return a granted vote
-        return raft_pb2.VoteResponse(vote_granted=True)
+        request_dict = MessageToDict(request, preserving_proto_field_name=True)
+        request_dict["kind"] = "Request Vote"
+        pubsub = self.queue.subscribe('consensus')
+
+        self.queue.publish('server', request_dict)
+
+        for message in pubsub.listen():
+            # print(message)
+            if message['type'] == 'message':
+                message = message['data'].decode('utf-8')
+                message = json.loads(message)
+                # print(message['node_id'], request_dict['node_id'])
+                if message['node_id'] == request_dict['node_id']:
+                    if message['response'] == 'Accept':
+                        return raft_pb2.VoteResponse(vote_granted=True)
+                    else:
+                        return raft_pb2.VoteResponse(vote_granted=True)
+                    break
+
 
     def AppendEntries(self, request, context):
         """
         gRPC method to handle AppendEntries RPC.
         Implement the logic to handle appending log entries here.
         """
+        request_dict = MessageToDict(request, preserving_proto_field_name=True)
+        request_dict["kind"] = "Append Entries"
+        pubsub = self.queue.subscribe('consensus')
+
+        self.queue.publish('server',request_dict)
+
+        for message in pubsub.listen():
+            # print(message)
+            if message['type'] == 'message':
+                message = message['data'].decode('utf-8')
+                message = json.loads(message)
+                # print(message['node_id'],request_dict['id'])
+                if message['node_id']==request_dict['id']:
+                    if message['response']=='Accept':
+                        return raft_pb2.AppendResponse(success=True)
+                    else:
+                        return raft_pb2.AppendResponse(success=False)
+                    break
+
         # Implement your logic here (e.g., append log entries to the log)
-        # For demonstration purposes, we'll simply return a success response
-        return raft_pb2.AppendResponse(success=True)
 
 
 def serve():
