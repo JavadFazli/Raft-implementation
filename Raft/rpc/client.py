@@ -1,5 +1,5 @@
 import grpc
-import raft_pb2, raft_pb2_grpc  # Import generated gRPC files
+from Raft.rpc import raft_pb2, raft_pb2_grpc  # Import generated gRPC files
 from Raft.app.config import Config  # Import configuration settings
 
 
@@ -19,8 +19,8 @@ class RaftClient:
         # Create a request for the RequestVote RPC
         term=message["term"]
         node_id=message["id"]
-        Last_Log_Term=message["Last Log Term"]
-        Last_Log_Id=message["Last Log Id"]
+        Last_Log_Term=message["Last_Log_Term"]
+        Last_Log_Id=message["Last_Log_Id"]
         request = raft_pb2.VoteRequest(node_id = node_id, term = term, Last_Log_Term = Last_Log_Term, Last_Log_Id = Last_Log_Id
 )
         # node_id = node_id, term = term, Last_Log_Term = Last_Log_Term, Last_Log_Id = Last_Log_Id
@@ -34,11 +34,11 @@ class RaftClient:
     def append_entries(self, message):
         term = message["term"]
         id = message["id"]
-        destination_id = message["Destination Id"]
-        prev_log_term = message["Prev Log Term"]
-        prev_log_id = message["Prev Log Id"]
+        destination_id = message["Destination_Id"]
+        prev_log_term = message["Prev_Log_Term"]
+        prev_log_id = message["Prev_Log_Id"]
         entries = message["Entries"]
-        leader_commit = message["Leader Commite"]
+        leader_commit = message["Leader_Commite"]
 
         request = raft_pb2.LogEntry(
             term=term,
@@ -60,11 +60,11 @@ if __name__ == "__main__":
     client = RaftClient()
 
     # Example RequestVote RPC
-    message={"term":2,"id":3,"Last Log Term":4,"Last Log Id":5}
+    message={"term":2,"id":3,"Last_Log_Term":4,"Last_Log_Id":5}
     vote_granted = client.request_vote(message)
     print("Vote Granted:", vote_granted)
 
     # Example AppendEntries RPC
-    message2={"term":2, "id":1, "Destination Id":1 ,"Prev Log Term":2 ,"Prev Log Id":2 ,"Entries":"22" ,"Leader Commite":5}
+    message2={"term":2, "id":1, "Destination_Id":1 ,"Prev_Log_Term":2 ,"Prev_Log_Id":2 ,"Entries":"22" ,"Leader_Commite":5}
     success = client.append_entries(message2)
     print("Append Entries Success:", success)
