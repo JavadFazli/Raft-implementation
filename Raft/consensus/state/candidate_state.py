@@ -11,7 +11,6 @@ class Condidate_state(State, threading.Thread):
         State.__init__(self, consensus)
     
     def run(self):
-    
         self.vote.append(self.consensus.id)
         # TODO send paraller
     
@@ -21,9 +20,10 @@ class Condidate_state(State, threading.Thread):
     def receive_append_entries(self, message, destination_id):
         
         # How about the message has log?
-        if message["term"] >= self.consensus.term: # TODO also last index and term
-            # changing voted for
-            self.consensus.voted_for = message["term"]
+        if message["term"] >= self.consensus.current_term: # TODO also last index and term
+            # changing leader
+            self.consensus.leader = message["id"]
+            self.consensus.voted_for = message["id"]
             self.send_append_entries_answer("Accept", message["id"])
             self.consensus.set_state("Follower")
             self.consensus.state.start()
@@ -54,7 +54,7 @@ class Condidate_state(State, threading.Thread):
             
     def send_request_vote(self):
         message = {}
-        message["term"] = self.consensus.term
+        message["term"] = self.current_term
         message["id"]  = self.consensus.id
         message["Last Log Term"] = self.consensus.last_log_term
         message["Last Log Id"] = self.consensus.last_log_index

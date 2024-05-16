@@ -17,6 +17,7 @@ class Consensus:
         self.state = Follower_state(self)
         self.queue = RedisQueue()
         self.voted_for = None
+        self.leader = None
         self.last_log_term = -1 # save last index and term in receive TODO
         self.last_log_index = -1
         self.number_of_nodes = 3

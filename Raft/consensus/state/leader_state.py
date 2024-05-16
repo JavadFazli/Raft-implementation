@@ -1,6 +1,7 @@
 import threading
 from Raft.consensus.state.state import State
 import numpy as np
+import signal
 
 class Leader_state(State, threading.Thread):
 
@@ -13,10 +14,12 @@ class Leader_state(State, threading.Thread):
         threading.Thread.__init__(self)
         State.__init__(self, consensus)
         
+        print("I'm a leader now !!")
+        
     
     def run(self):
          
-        for destination_index in range(self.next_index):
+        for destination_index in range(len(self.next_index)):
             threading.Thread(target=self.send_append_entries, args=("", destination_index)).start()
         
         self.__heartbeat()
@@ -73,12 +76,12 @@ class Leader_state(State, threading.Thread):
     def send_append_entries(self, entries: list, destination_id):
         
         message = {}
-        message["term"] = self.consensus.term
+        message["term"] = self.current_term
         message["id"]  = self.consensus.id
         message["Destination Id"] = destination_id
         message["Prev Log Term"] = -1 # TODO
         message["Prev Log Id"] = -1 # TODO
-        message["Entries"] = s = '#'.join(entries)
+        message["Entries"] = '#'.join(entries)
         message["Leader Commite"] = self.consensus.commit_index
 
         self.consensus.send_append_entries(message)
@@ -87,7 +90,7 @@ class Leader_state(State, threading.Thread):
     def __handler(self, signum, frame):
         
         self.__heartbeat()
-        for destination_index in range(self.next_index):
+        for destination_index in range(len(self.next_index)):
             threading.Thread(target=self.send_append_entries, args=("", destination_index)).start()
         
     def __heartbeat(self):
@@ -100,7 +103,7 @@ class Leader_state(State, threading.Thread):
     
     def __send_to_all(self):
         
-        for destination_index in range(self.next_index):
+        for destination_index in range(len(self.next_index)):
             
             if self.next_index[destination_index] <= self.consensus.last_log_index:
                 

@@ -13,17 +13,15 @@ class Follower_state(State, threading.Thread):
     def run(self): 
         pass
     
-    # TODO delete after test
-    def Test(self):
-        print("run of follower state")
-    
     def receive_request_vote(self, message): 
         
-        if message["term"] > self.consensus.current_term:
-            self.send_request_vote_answer("Accept", message["node_id"])
+        if message["term"] > self.consensus.current_term and message["Last Log Term"] >= self.consensus.last_log_term and message["Last Log Id"] >= self.consensus.last_log_index and self.consensus.voted_for == None:
+            self.consensus.voted_for = message["id"]
+            self.send_request_vote_answer("Accept", message["id"])
+            self.consensus.current_term = message["term"]
             
         else:
-            self.send_append_entries_answer("Reject", message["node_id"])
+            self.send_append_entries_answer("Reject", message["id"])
     
     def receive_append_entries(self, message):
         
@@ -38,7 +36,8 @@ class Follower_state(State, threading.Thread):
             
             # Heartbeat
             if message["Entries"] == "":
-                self.consensus.voted_for = message["id"]
+                self.consensus.voted_for = None
+                self.consensus.leader = message["id"]
             
             else:
                 
@@ -59,15 +58,7 @@ class Follower_state(State, threading.Thread):
                     self.send_append_entries_answer("Accept", message["id"])
     
     def receive_request_vote_answer(self, message):
-        
-        if message["term"] > self.consensus.current_term:
-            
-            self.consensus.voted_for = message["id"]
-            self.send_request_vote_answer("Accept", message["id"])
-            self.consensus.current_term = message["term"]
-            
-        else:
-            self.send_request_vote_answer("Accept", message["id"])
+        pass
             
     
     def receive_append_entries_answer(self, message):
