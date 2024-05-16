@@ -5,7 +5,7 @@ from Raft.broker.queue import RedisQueue
 from Raft.consensus.state.follower_state import Follower_state
 from Raft.consensus.state.candidate_state import Condidate_state
 from Raft.consensus.state.leader_state import Leader_state
-# from Raft.rpc.client import RaftClient
+from Raft.rpc.client import RaftClient
 import json 
 
 class Consensus:
@@ -15,7 +15,7 @@ class Consensus:
         self.log = Log()
         self.current_term = 1
         self.state = Follower_state(self)
-        self.queue = RedisQueue()
+        self.queue = RedisQueue(host='0.0.0.0', port=6379)
         self.voted_for = None
         self.leader = None
         self.last_log_term = -1 # save last index and term in receive TODO
@@ -23,18 +23,16 @@ class Consensus:
         self.number_of_nodes = 3
         self.commit_index = 0
         self.last_applied = 0
-        # self.client = RaftClient()
+        self.client = RaftClient()
         
     def __handler(self, signum, frame):
         print('Signal handler called with signal', signum) # TODO delete Test
         self.__reset_timeout()
-        self.state.join()
         self.set_state("Candidate")
-        self.state.start()
         
     # TODO Listen to its queue
     def start(self):
-        pubsub=self.queue.subscribe('server')
+        pubsub=self.queue.subscribe('my_channel')
         self.__reset_timeout()
         self.state.start()
         for message in pubsub.listen():
@@ -48,17 +46,11 @@ class Consensus:
                     self.__reset_timeout()
                     # TODO error
                     print('Append')
-                    # answer_receive_append_entries = self.state.receive_append_entries(message)
-                    self.queue.publish('consensus',{'response':"Reject","node_id":1})
-
+                    self.receive_append_entries(message)
+                    
                 elif message["kind"] == "Request Vote":
-                    self.queue.publish('consensus',{'response':"Accept","node_id":3})
-
                     self.__reset_timeout()
-                    self.state.receive_request_vote(message)
-
-                elif message["kind"] == "Answer":
-                    self.state.receive_answer(message)
+                    self.receive_request_vote(message)
 
                 elif message["kind"] == "Client":
                     self.state.receive_client_message(message)
@@ -69,18 +61,21 @@ class Consensus:
                 
          
     def __reset_timeout(self):
-        # timeout = random.randint(7, 14)
-        # signal.signal(signal.SIGALRM, self.__handler)
-        # signal.alarm(timeout)
+        timeout = random.randint(7, 14)
+        signal.signal(signal.SIGALRM, self.__handler)
+        signal.alarm(timeout)
         pass
     
     def set_state(self, kind):
         
         del self.state
+        # TODO uncomment it
+        # self.state.join()
         
         if kind == "Candidate":
             self.state = Condidate_state(self)
         elif kind == "Leader":
+            signal.alarm(0)
             self.state = Leader_state(self)
         elif kind == "Follower":
             self.state = Follower_state(self)
@@ -91,32 +86,36 @@ class Consensus:
         
     
     def send_request_vote(self, message: dict):
-        # x = client.##
-        # self.state.receive_request_vote_answer(x)
+        answer = self.client.request_vote(message)
+        self.receive_request_vote_answer(answer)
         print("send_request_vote")
     
     def send_append_entries(self, message: dict):
-        # answer_follower_append_entries = client.
-        # self.state.receive_append_entries_answer(answer_follower_append_entries)
-        pass
+        answer = self.client.append_entries(message)
+        self.receive_append_entries_answer(answer)
+        print("send_append_entries")
     
     def send_request_vote_answer(self, message: dict):
+        self.queue.publish('consensus',message)
         print("send_request_vote_answer")
     
     def send_append_entries_answer(self, message: dict):
+        self.queue.publish('consensus',message)
         print("send_append_entries_answer") 
 
     def receive_request_vote(self, message: dict):
-        # 
-        pass
+        self.state.receive_request_vote(message)
     
-    def receive_append_entries(self):
+    def receive_append_entries(self, message: dict):
+        self.state.receive_append_entries(message)
         print("receive_append_entries")
     
-    def receive_request_vote_answer(self):
+    def receive_request_vote_answer(self, message: dict):
+        self.state.receive_request_vote_answer(message)
         print("receive_request_vote_answer")
     
-    def receive_append_entries_answer(self):
+    def receive_append_entries_answer(self, message: dict):
+        self.state.receive_append_entries_answer(message)
         print("receive_append_entries_answer")
                 
                 

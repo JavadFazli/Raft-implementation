@@ -36,6 +36,7 @@ class Follower_state(State, threading.Thread):
             
             # Heartbeat
             if message["Entries"] == "":
+                print('')
                 self.consensus.voted_for = None
                 self.consensus.leader = message["id"]
             
