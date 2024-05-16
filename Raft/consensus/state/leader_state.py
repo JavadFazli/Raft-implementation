@@ -42,11 +42,11 @@ class Leader_state(State, threading.Thread):
 
         if message["Answer"] == "Accept":
             
-            self.next_index[message["Id"]] += 1
+            self.next_index[message["id"]] += 1
             
-            if self.consensus.last_log_index >= self.next_index[message["Id"]]:
+            if self.consensus.last_log_index >= self.next_index[message["id"]]:
                 
-                self.send_append_entries("get", message["Id"]) #TODO get entry
+                self.send_append_entries("get", message["id"]) #TODO get entry
                 
             
         if message["Answer"] == "Reject":
@@ -57,8 +57,8 @@ class Leader_state(State, threading.Thread):
                 self.consensus.state.start()
                 
             else:
-                self.next_index[message["Id"]] -= 1
-                self.send_append_entries("get", message["Id"]) #TODO get entry
+                self.next_index[message["id"]] -= 1
+                self.send_append_entries("get", message["id"]) #TODO get entry
             
         
     def receive_client_message(self, message):
