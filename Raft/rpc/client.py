@@ -1,6 +1,7 @@
 import grpc
 from Raft.rpc import raft_pb2, raft_pb2_grpc  # Import generated gRPC files
 from Raft.app.config import Config  # Import configuration settings
+from google.protobuf.json_format import MessageToDict
 
 
 class RaftClient:
@@ -18,18 +19,21 @@ class RaftClient:
     def request_vote(self, message):
         # Create a request for the RequestVote RPC
         term=message["term"]
-        node_id=message["id"]
+        id=message["id"]
         Last_Log_Term=message["Last_Log_Term"]
         Last_Log_Id=message["Last_Log_Id"]
-        request = raft_pb2.VoteRequest(node_id = node_id, term = term, Last_Log_Term = Last_Log_Term, Last_Log_Id = Last_Log_Id
+        request = raft_pb2.VoteRequest(id = id, term = term, Last_Log_Term = Last_Log_Term, Last_Log_Id = Last_Log_Id
 )
         # node_id = node_id, term = term, Last_Log_Term = Last_Log_Term, Last_Log_Id = Last_Log_Id
         # request.node_id = node_id
 
         # Call the RequestVote RPC and return the response
 
-        response = self.create_stub(node_id).RequestVote(request)
-        return response.vote_granted
+        response = self.create_stub(id).RequestVote(request)
+        response_dict = MessageToDict(request, preserving_proto_field_name=True)
+
+        return response_dict
+
 
     def append_entries(self, message):
         term = message["term"]
@@ -52,15 +56,16 @@ class RaftClient:
         # Call the AppendEntries RPC and return the response
 
         response = self.create_stub(destination_id).AppendEntries(request)
-        return response.success
+        response_dict = MessageToDict(request, preserving_proto_field_name=True)
 
+        return response_dict
 
 # Example usage:
 if __name__ == "__main__":
     client = RaftClient()
 
-    # Example RequestVote RPC
-    message={"term":2,"id":3,"Last_Log_Term":4,"Last_Log_Id":5}
+    # # Example RequestVote RPC
+    message={"term":2,"id":1,"Last_Log_Term":1,"Last_Log_Id":1}
     vote_granted = client.request_vote(message)
     print("Vote Granted:", vote_granted)
 

@@ -13,7 +13,7 @@ services:
       - redis
       - mongo
     environment:
-      - NODE_ID=node_1
+      - NODE_ID=1
       - GRPC_PORT=50051
       - REDIS_HOST=redis
       - REDIS_PORT=6379

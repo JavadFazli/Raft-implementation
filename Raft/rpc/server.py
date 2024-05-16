@@ -19,7 +19,7 @@ class RaftServicer(raft_pb2_grpc.RaftServiceServicer):
         Implement the logic to handle vote requests here.
         """
         request_dict = MessageToDict(request, preserving_proto_field_name=True)
-        request_dict["kind"] = "Request Vote"
+        request_dict["kind"] = "RequestVote"
         pubsub = self.queue.subscribe('consensus')
 
         self.queue.publish('server', request_dict)
@@ -30,11 +30,11 @@ class RaftServicer(raft_pb2_grpc.RaftServiceServicer):
                 message = message['data'].decode('utf-8')
                 message = json.loads(message)
                 # print(message['node_id'], request_dict['node_id'])
-                if message['node_id'] == request_dict['node_id']:
-                    if message['response'] == 'Accept':
-                        return raft_pb2.VoteResponse(vote_granted=True)
+                if message['id'] == request_dict['Destination_Id']:
+                    if message['Answer'] == 'Accept':
+                        return raft_pb2.VoteResponse(vote_granted=True,term=message['term'],id=message['id'])
                     else:
-                        return raft_pb2.VoteResponse(vote_granted=True)
+                        return raft_pb2.VoteResponse(vote_granted=True,term=message['term'],id=message['id'])
                     break
 
 
@@ -44,22 +44,22 @@ class RaftServicer(raft_pb2_grpc.RaftServiceServicer):
         Implement the logic to handle appending log entries here.
         """
         request_dict = MessageToDict(request, preserving_proto_field_name=True)
-        request_dict["kind"] = "Append Entries"
+        request_dict["kind"] = "AppendEntries"
         pubsub = self.queue.subscribe('consensus')
-
+        print(request_dict)
         self.queue.publish('server',request_dict)
 
         for message in pubsub.listen():
-            # print(message)
+            print(message)
             if message['type'] == 'message':
                 message = message['data'].decode('utf-8')
                 message = json.loads(message)
-                # print(message['node_id'],request_dict['id'])
-                if message['node_id']==request_dict['id']:
-                    if message['response']=='Accept':
-                        return raft_pb2.AppendResponse(success=True)
+                print(message['id'],request_dict['Destination_Id'])
+                if message['id']==request_dict['Destination_Id']:
+                    if message['Answer']=='Accept':
+                        return raft_pb2.AppendResponse(success=True,term=message['term'],id=message['id'])
                     else:
-                        return raft_pb2.AppendResponse(success=False)
+                        return raft_pb2.AppendResponse(success=False,term=message['term'],id=message['id'])
                     break
 
         # Implement your logic here (e.g., append log entries to the log)

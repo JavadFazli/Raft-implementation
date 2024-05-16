@@ -32,17 +32,25 @@ class Consensus:
         
     # TODO Listen to its queue
     def start(self):
-        pubsub=self.queue.subscribe('my_channel')
+        pubsub=self.queue.subscribe('server')
         self.__reset_timeout()
         self.state.start()
         for message in pubsub.listen():
             if message['type'] == 'message':
                 message = message['data'].decode('utf-8')
                 message = json.loads(message)
-                # print(message)
-                # message=message['data']
+                print(message)
                 # TODO condition
+
                 if message["kind"] == "AppendEntries":
+
+                    message2 = {}
+                    message2["Answer"] = 'Accept'
+                    message2["term"] = self.current_term
+                    message2["Destination_Id"] = message['id']
+                    message2["id"] = self.id
+                    self.queue.publish('consensus', message2)
+
                     self.__reset_timeout()
                     # TODO error
                     self.receive_append_entries(message)
@@ -50,6 +58,13 @@ class Consensus:
                 elif message["kind"] == "RequestVote":
                     self.__reset_timeout()
                     self.receive_request_vote(message)
+
+                    message2 = {}
+                    message2["Answer"] = 'Accept'
+                    message2["term"] = self.current_term
+                    message2["Destination_Id"] = message['id']
+                    message2["id"] = self.id
+                    self.queue.publish('consensus', message2)
 
                 elif message["kind"] == "Client":
                     self.state.receive_client_message(message)
@@ -60,9 +75,9 @@ class Consensus:
                 
          
     def __reset_timeout(self):
-        timeout = random.randint(7, 14)
-        signal.signal(signal.SIGALRM, self.__handler)
-        signal.alarm(timeout)
+        # timeout = random.randint(7, 14)
+        # signal.signal(signal.SIGALRM, self.__handler)
+        # signal.alarm(timeout)
         pass
     
     def set_state(self, kind):

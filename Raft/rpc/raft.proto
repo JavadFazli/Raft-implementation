@@ -16,6 +16,8 @@ message VoteRequest {
 
 message VoteResponse {
     bool vote_granted = 1;
+    int32 term=2;
+    int32 id=3;
 }
 
 message LogEntry {
@@ -30,4 +32,6 @@ message LogEntry {
 
 message AppendResponse {
     bool success = 1;
+    int32 term=2;
+    int32 id=3;
 }
