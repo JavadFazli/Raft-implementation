@@ -21,7 +21,7 @@ class Follower_state(State, threading.Thread):
             self.consensus.current_term = message["term"]
             
         else:
-            self.send_append_entries_answer("Reject", message["id"])
+            self.send_request_vote_answer("Reject", message["id"])
     
     def receive_append_entries(self, message):
         
@@ -30,24 +30,24 @@ class Follower_state(State, threading.Thread):
             
         else:
             # Check commit
-            if message["Leader_Commite"] > self.consensus.commit_index:
+            if message["Leader Commite"] > self.consensus.commit_index:
                 # TODO delete log
                 self.consensus.commit_index = message["Leader_Commite"]
             
             # Heartbeat
             if message["Entries"] == "":
-                print('')
+                print("Heartbeat !!!")
                 self.consensus.voted_for = None
                 self.consensus.leader = message["id"]
             
             else:
                 
                 # Log isn't update
-                if message["Prev_Log_Term"] == self.consensus.last_log_term and message["Prev_Log_Id"] != self.consensus.last_log_index:
+                if message["Prev Log Term"] == self.consensus.last_log_term and message["Prev Log Id"] != self.consensus.last_log_index:
                     self.send_append_entries_answer("Reject", message["id"])
                     return
                     
-                elif message["Prev_Log_Term"] != self.consensus.last_log_term:
+                elif message["Prev Log Term"] != self.consensus.last_log_term:
                     # TODO delete current entry
                     self.send_append_entries_answer("Reject", message["id"])
                     pass
@@ -55,7 +55,7 @@ class Follower_state(State, threading.Thread):
                 else:
                     self.consensus.last_log_index += 1
                     self.consensus.last_log_term = message["term"]
-                    self.consensus.log.store(message["Entries"])
+                    self.consensus.log.store(message["Entries"], message["term"], message["id"])
                     self.send_append_entries_answer("Accept", message["id"])
     
     def receive_request_vote_answer(self, message):
