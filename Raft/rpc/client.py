@@ -11,9 +11,13 @@ class RaftClient:
         # Create a stub for the Raft service
         self.stub = raft_pb2_grpc.RaftServiceStub(self.channel)
 
-    def request_vote(self, node_id, term):
+    def request_vote(self, message):
         # Create a request for the RequestVote RPC
-        request = raft_pb2.VoteRequest(node_id=node_id, term=term)
+        term=message["term"]
+        node_id=message["id"]
+        Last_Log_Term=message["Last Log Term"]
+        Last_Log_Id=message["Last Log Id"]
+        request = raft_pb2.VoteRequest(node_id=node_id, term=term,Last_Log_Term=Last_Log_Term,Last_Log_Id=Last_Log_Id)
 
         # Call the RequestVote RPC and return the response
         response = self.stub.RequestVote(request)

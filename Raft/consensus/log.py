@@ -3,7 +3,7 @@ class Log:
     def __init__(self):
         self.db = MongoDB()  # Initialize MongoDB connection
 
-    def store(self, log_entry , term):
+    def store(self, log_entry , term, index):
         """
         Store a log entry in MongoDB.
 
@@ -12,9 +12,9 @@ class Log:
         """
         try:
             # Check if a document with the specified term already exists
-            if self.db.get_collection('log').find_one({'term': term}):
-                raise ValueError("Error: A document with the specified term already exists.")
-            log_document = {"log_entry": log_entry,'term': term}  # Create a dictionary representing the log entry
+            if self.db.get_collection('log').find_one({'index': index}):
+                raise ValueError("Error: A document with the specified index already exists.")
+            log_document = {"log_entry": log_entry,'term': term,'index':index}  # Create a dictionary representing the log entry
             self.db.insert_one("log", log_document)
             # self.db.insert_one("log", log_entry)
             print("Log entry stored successfully.")
@@ -38,19 +38,19 @@ class Log:
             print(f"Error loading log entries: {e}")
             return []
 
-    def find_log_by_term(self,term):
+    def find_log_by_index(self,index):
         """
         Find a document with the  log_entry, and term.
         """
         collection=self.db.get_collection('log')
-        query = {'term': term}
+        query = {'index': index}
         result = collection.find_one(query)
         return result
-    def delete_log_by_term(self, term):
+    def delete_log_by_index(self, index):
         """
         Find a document with the  log_entry, and term.
         """
         collection=self.db.get_collection('log')
-        query = { 'term': term}
+        query = {'index': index}
         result = collection.delete_one(query)
         return result

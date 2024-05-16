@@ -2,7 +2,10 @@ version: '3.8'
 
 services:
   raft_node:
-    build: Raft/doker  # Build the Docker image from the current directory
+    build:
+      context: .
+      dockerfile: ./Dockerfile
+      # Build the Docker image from the current directory
     container_name: raft_node_1  # Set the container's name
     ports:
       - "50051:50051"  # gRPC port for communication with other nodes
