@@ -1,6 +1,6 @@
 import grpc
 import raft_pb2, raft_pb2_grpc  # Import generated gRPC files
-from app.config import Config  # Import configuration settings
+from Raft.app.config import Config  # Import configuration settings
 
 
 class RaftClient:

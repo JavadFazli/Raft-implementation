@@ -9,7 +9,7 @@ ENV PYTHONUNBUFFERED 1
 WORKDIR /app
 
 # Copy the project files to the working directory
-COPY . /app
+COPY Raft/doker /app
 
 # Install the required packages from requirements.txt
 RUN pip install --upgrade pip && pip install -r requirements.txt

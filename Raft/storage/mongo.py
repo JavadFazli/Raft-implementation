@@ -1,6 +1,6 @@
 from pymongo import MongoClient
 from pymongo.errors import PyMongoError
-from app.config import Config
+from Raft.app.config import (Config)
 
 class MongoDB:
     def __init__(self):
@@ -43,6 +43,7 @@ class MongoDB:
         except PyMongoError as e:
             print(f"Error updating document in {collection_name}: {e}")
             raise e
+
 
     def delete_one(self, collection_name, query):
         # Delete a single document based on a query
