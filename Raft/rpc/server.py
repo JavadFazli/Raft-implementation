@@ -30,7 +30,7 @@ class RaftServicer(raft_pb2_grpc.RaftServiceServicer):
                 message = message['data'].decode('utf-8')
                 message = json.loads(message)
                 # print(message['node_id'], request_dict['node_id'])
-                if message['id'] == request_dict['Destination_Id']:
+                if message['Destination_Id'] == request_dict['id']:
                     if message['Answer'] == 'Accept':
                         return raft_pb2.VoteResponse(vote_granted=True,term=message['term'],id=message['id'])
                     else:

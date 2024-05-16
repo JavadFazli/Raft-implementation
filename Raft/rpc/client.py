@@ -20,6 +20,7 @@ class RaftClient:
         # Create a request for the RequestVote RPC
         term=message["term"]
         id=message["id"]
+        destination_id = message["Destination_Id"]
         Last_Log_Term=message["Last_Log_Term"]
         Last_Log_Id=message["Last_Log_Id"]
         request = raft_pb2.VoteRequest(id = id, term = term, Last_Log_Term = Last_Log_Term, Last_Log_Id = Last_Log_Id
@@ -29,7 +30,7 @@ class RaftClient:
 
         # Call the RequestVote RPC and return the response
 
-        response = self.create_stub(id).RequestVote(request)
+        response = self.create_stub(destination_id).RequestVote(request)
         response_dict = MessageToDict(request, preserving_proto_field_name=True)
 
         return response_dict
@@ -65,7 +66,7 @@ if __name__ == "__main__":
     client = RaftClient()
 
     # # Example RequestVote RPC
-    message={"term":2,"id":1,"Last_Log_Term":1,"Last_Log_Id":1}
+    message={"term":2,"id":1,"Last_Log_Term":1,"Last_Log_Id":1,"Destination_Id":1}
     vote_granted = client.request_vote(message)
     print("Vote Granted:", vote_granted)
 
