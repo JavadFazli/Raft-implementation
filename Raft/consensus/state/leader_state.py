@@ -65,8 +65,9 @@ class Leader_state(State, threading.Thread):
         
         self.consensus.last_log_index += 1
         self.consensus.last_log_term = self.consensus.current_term
-        self.consensus.log.store(message) # TODO Type of message is considered string
         self.__send_to_all()
+        self.consensus.log.store(message) # TODO Type of message is considered string
+        
         
     
     def send_request_vote(self):
@@ -107,5 +108,5 @@ class Leader_state(State, threading.Thread):
             
             if self.next_index[destination_index] <= self.consensus.last_log_index:
                 
-                threading.Thread(target=self.send_append_entries, args=(10, destination_index)).start() # TODO get next_index entry
+                threading.Thread(target=self.send_append_entries, args=(self.next_index[destination_index], destination_index)).start()
                 

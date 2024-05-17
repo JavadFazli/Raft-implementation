@@ -17,7 +17,7 @@ class Condidate_state(State, threading.Thread):
     def receive_request_vote(self, message): 
         self.send_answer("Reject")
     
-    def receive_append_entries(self, message, destination_id):
+    def receive_append_entries(self, message):
         
         # How about the message has log?
         if message["term"] >= self.consensus.current_term: # TODO also last index and term
@@ -26,7 +26,6 @@ class Condidate_state(State, threading.Thread):
             self.consensus.voted_for = message["id"]
             self.send_append_entries_answer("Accept", message["id"])
             self.consensus.set_state("Follower")
-            self.consensus.state.start()
         else:
             self.send_append_entries_answer("Reject", message["id"])
             

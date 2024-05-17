@@ -31,7 +31,9 @@ class Follower_state(State, threading.Thread):
         else:
             # Check commit
             if message["Leader_Commite"] > self.consensus.commit_index:
-                # TODO delete log
+                while self.consensus.commit_index < message["Leader_Commite"]:
+                    self.consensus.log.delete_log_by_index(self.consensus.commit_index)
+                    self.consensus.commit_index -= 1
                 self.consensus.commit_index = message["Leader_Commite"]
             
             # Heartbeat
@@ -44,6 +46,9 @@ class Follower_state(State, threading.Thread):
                 
                 # Log isn't update
                 if message["Prev_Log_Term"] == self.consensus.last_log_term and message["Prev_Log_Id"] != self.consensus.last_log_index:
+                    print()
+                    print("second message")
+                    print()
                     self.send_append_entries_answer("Reject", message["id"])
                     return
                     
@@ -54,27 +59,24 @@ class Follower_state(State, threading.Thread):
                 
                 else:
                     self.consensus.last_log_index += 1
+                    
                     self.consensus.last_log_term = message["term"]
-                    self.consensus.log.store(message["Entries"], message["term"], message["id"])
+                    message["index"] = self.consensus.last_log_index
                     self.send_append_entries_answer("Accept", message["id"])
+                    self.consensus.log.store(message)
     
     def receive_request_vote_answer(self, message):
-        pass
-            
+        raise Exception("Receive Request Vote Answer is not valid for Follower !!!!")  
     
     def receive_append_entries_answer(self, message):
-        # TODO rise exception
-        pass
+        raise Exception("Receive Append Entries Answer is not valid for Follower !!!!")
     
     def receive_client_message(self, message):
-        # TODO rise exception
-        pass
+        raise Exception("Receive Client Message is not valid for Follower !!!!")
     
     def send_request_vote(self):
-        # TODO rise exception
-        pass
+        raise Exception("Send Request Vote is not valid for Follower !!!!")
     
     def send_append_entries(self, entries: list, destination_id):
-        # TODO rise exception
-        pass
+        raise Exception("Send Append Entries is not valid for Follower !!!!")
 
