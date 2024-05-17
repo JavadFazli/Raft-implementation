@@ -21,5 +21,11 @@ class Config:
     REDIS_URI=os.getenv("REDIS_URI")
     NODE_HOSTS= json.loads(os.getenv("NODE_HOSTS"))
     NODE_HOSTS = {int(key): value for key, value in NODE_HOSTS.items()}
+    NODES_NUMBER = int(os.getenv("NODES_NUMBER"))
+    HEARTBEAT = int(os.getenv("HEARTBEAT"))
+    START_TIMEOUT = int(os.getenv("START_TIMEOUT"))
+    STOP_TIMEOUT = int(os.getenv("STOP_TIMEOUT"))
+    
+    
 
     # Additional configuration

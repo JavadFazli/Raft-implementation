@@ -11,6 +11,7 @@ class Follower_state(State, threading.Thread):
         State.__init__(self, consensus)
 
     def run(self): 
+        print("Follower state !!!")
         pass
     
     def receive_request_vote(self, message): 
@@ -46,9 +47,6 @@ class Follower_state(State, threading.Thread):
                 
                 # Log isn't update
                 if message["Prev_Log_Term"] == self.consensus.last_log_term and message["Prev_Log_Id"] != self.consensus.last_log_index:
-                    print()
-                    print("second message")
-                    print()
                     self.send_append_entries_answer("Reject", message["id"])
                     return
                     
@@ -59,7 +57,6 @@ class Follower_state(State, threading.Thread):
                 
                 else:
                     self.consensus.last_log_index += 1
-                    
                     self.consensus.last_log_term = message["term"]
                     message["index"] = self.consensus.last_log_index
                     self.send_append_entries_answer("Accept", message["id"])
