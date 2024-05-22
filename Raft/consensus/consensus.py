@@ -21,6 +21,7 @@ class Consensus:
         self.log = Log()
         self.current_term = 1
         self.state = Follower_state(self)
+        self.state_kind = "Follower"
         self.queue = RedisQueue(host='0.0.0.0', port=6379)
         self.voted_for = None
         self.leader = None
@@ -35,6 +36,8 @@ class Consensus:
     def __handler(self, signum=0, frame=0):
         print('Timeout', signum) # TODO delete Test
         self.__reset_timeout()
+        if self.state_kind == "Candidate":
+            self.current_term += 1
         self.set_state("Candidate")
         
     # TODO Listen to its queue
@@ -98,11 +101,14 @@ class Consensus:
         # self.state.join()
         
         if kind == "Candidate":
+            self.state_kind = "Candidate"
             self.state = Condidate_state(self)
         elif kind == "Leader":
-            signal.alarm(0)
+            self.timer.stop()
+            self.state_kind = "Leader"
             self.state = Leader_state(self)
         elif kind == "Follower":
+            self.state_kind = "Follower"
             self.state = Follower_state(self)
         else:
             # TODO rise exception
@@ -111,8 +117,8 @@ class Consensus:
         
     
     def send_request_vote(self, message: dict):
-        answer = self.client.request_vote(message)
-        self.receive_request_vote_answer(answer)
+        # answer = self.client.request_vote(message)
+        # self.receive_request_vote_answer(answer)
         print("send_request_vote")
     
     def send_append_entries(self, message: dict):
