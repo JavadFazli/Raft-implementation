@@ -10,7 +10,7 @@ class Leader_state(State, threading.Thread):
     def __init__(self, consensus):
         
         self.consensus = consensus
-        self.next_index = np.full(shape=self.consensus.number_of_nodes, fill_value=1+self.consensus.last_log_index, dtype=int)
+        self.next_index = np.full(shape=self.consensus.number_of_nodes, fill_value=self.consensus.last_log_index+1, dtype=int)
         self.match_index = np.zeros(self.consensus.number_of_nodes)
         self.flag = False
         
@@ -20,21 +20,17 @@ class Leader_state(State, threading.Thread):
         print("I'm a leader now !!") 
     
     def run(self):
-        # TODO uncomment it
-        # threading.Thread(target=self.__heartbeat)
+        # threading.Thread(target=self.__heartbeat).start()
         pass
     
     def receive_request_vote(self, message): 
-        # TODO rise exception
-        pass
+        raise Exception("Receive Request Vote is not valid for Leader !!!!") 
     
     def receive_append_entries(self, message):
-        # TODO rise exception
-        pass        
+        raise Exception("Receive Append Entries is not valid for Leader !!!!")        
     
     def receive_request_vote_answer(self, message):
-        # TODO rise exception
-        pass
+        raise Exception("Receive Request Vote Answer is not valid for Leader !!!!") 
     
     def receive_append_entries_answer(self, message):
 
@@ -58,39 +54,58 @@ class Leader_state(State, threading.Thread):
         
     def receive_client_message(self, message):
         
+        message["index"] = self.consensus.last_log_index+1
+        message["term"] = self.consensus.current_term
+        message["Leader_Commite"] = self.consensus.commit_index
+        message["Prev_Log_Term"] = self.consensus.last_log_term
+        message["Prev_Log_Id"] = self.consensus.last_log_index
+        message["id"]  = self.consensus.id
+        message["Destination_Id"] = self.consensus.id
+        
+        self.consensus.log.store(message)
         self.consensus.last_log_index += 1
         self.consensus.last_log_term = self.consensus.current_term
+        
         if self.flag == False:
             self.flag = True
             self.__send_to_all()
-        message["index"] = self.consensus.last_log_index
-        message["term"] = self.consensus.last_log_term
-        # self.consensus.log.store(message)
+        
     
     def send_request_vote(self):
-        # TODO rise exception
-        pass
+        raise Exception("Send Request Vote Answer is not valid for Leader !!!!") 
     
     def send_append_entries(self, message_idex, destination_id):
         
-        message = {}
-        message["term"] = self.consensus.current_term
-        message["id"]  = self.consensus.id
-        message["Destination_Id"] = destination_id
-        message["Prev_Log_Term"] = self.consensus.last_log_term
-        message["Prev_Log_Id"] = self.consensus.last_log_index
-        message["Entries"] =  message_idex
-        # TODO True one:
-        # message["Entries"] = self.consensus.log.find_log_by_index(message_idex)["log_entry"]
-        message["Leader_Commite"] = self.consensus.commit_index
+        # It's heartbeat
+        if message_idex == -1:
+            message = {}
+            message["kind"] = "AppendEntries"
+            message["index"] = -1
+            message["term"] = self.consensus.current_term
+            message["id"] = self.consensus.id
+            message["Leader_Commite"] = self.consensus.commit_index
+            message["Destination_Id"] = destination_id
+            message["Prev_Log_Term"] = self.consensus.last_log_term
+            message["Prev_Log_Id"] = self.consensus.last_log_index
+            message["Entries"] = ""
+        
+        else:
+
+            message = self.consensus.log.find_log_by_index(int(message_idex))
+            message["Destination_Id"] = destination_id
+            message["Leader_Commite"] = self.consensus.commit_index
+            message["kind"] = "AppendEntries"
+
 
         self.consensus.send_append_entries(message)
         
     def __heartbeat(self):
         
         while(True):
+            
             for destination_index in range(len(self.next_index)):
-                threading.Thread(target=self.send_append_entries, args=("", destination_index)).start()
+                if destination_index != self.consensus.id:
+                    threading.Thread(target=self.send_append_entries, args=(-1, destination_index)).start()
             
             time.sleep(Config.HEARTBEAT)
         
@@ -106,6 +121,7 @@ class Leader_state(State, threading.Thread):
                 print("sending !!")
                 threading.Thread(target=self.send_append_entries, args=(self.next_index[destination_id], destination_id)).start()
                 self.next_index[destination_id] += 1
-                
+        
+        print("Sending to all ended")        
         self.flag = False
                 

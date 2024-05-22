@@ -2,8 +2,7 @@
 """Client and server classes corresponding to protobuf-defined services."""
 import grpc
 import warnings
-
-from . import raft_pb2 as raft__pb2
+from Raft.rpc import raft_pb2
 
 GRPC_GENERATED_VERSION = '1.63.0'
 GRPC_VERSION = grpc.__version__
@@ -41,13 +40,13 @@ class RaftServiceStub(object):
         """
         self.RequestVote = channel.unary_unary(
                 '/raft.RaftService/RequestVote',
-                request_serializer=raft__pb2.VoteRequest.SerializeToString,
-                response_deserializer=raft__pb2.VoteResponse.FromString,
+                request_serializer=raft_pb2.VoteRequest.SerializeToString,
+                response_deserializer=raft_pb2.VoteResponse.FromString,
                 _registered_method=True)
         self.AppendEntries = channel.unary_unary(
                 '/raft.RaftService/AppendEntries',
-                request_serializer=raft__pb2.LogEntry.SerializeToString,
-                response_deserializer=raft__pb2.AppendResponse.FromString,
+                request_serializer=raft_pb2.LogEntry.SerializeToString,
+                response_deserializer=raft_pb2.AppendResponse.FromString,
                 _registered_method=True)
 
 
@@ -71,13 +70,13 @@ def add_RaftServiceServicer_to_server(servicer, server):
     rpc_method_handlers = {
             'RequestVote': grpc.unary_unary_rpc_method_handler(
                     servicer.RequestVote,
-                    request_deserializer=raft__pb2.VoteRequest.FromString,
-                    response_serializer=raft__pb2.VoteResponse.SerializeToString,
+                    request_deserializer=raft_pb2.VoteRequest.FromString,
+                    response_serializer=raft_pb2.VoteResponse.SerializeToString,
             ),
             'AppendEntries': grpc.unary_unary_rpc_method_handler(
                     servicer.AppendEntries,
-                    request_deserializer=raft__pb2.LogEntry.FromString,
-                    response_serializer=raft__pb2.AppendResponse.SerializeToString,
+                    request_deserializer=raft_pb2.LogEntry.FromString,
+                    response_serializer=raft_pb2.AppendResponse.SerializeToString,
             ),
     }
     generic_handler = grpc.method_handlers_generic_handler(
@@ -104,8 +103,8 @@ class RaftService(object):
             request,
             target,
             '/raft.RaftService/RequestVote',
-            raft__pb2.VoteRequest.SerializeToString,
-            raft__pb2.VoteResponse.FromString,
+            raft_pb2.VoteRequest.SerializeToString,
+            raft_pb2.VoteResponse.FromString,
             options,
             channel_credentials,
             insecure,
@@ -131,8 +130,8 @@ class RaftService(object):
             request,
             target,
             '/raft.RaftService/AppendEntries',
-            raft__pb2.LogEntry.SerializeToString,
-            raft__pb2.AppendResponse.FromString,
+            raft_pb2.LogEntry.SerializeToString,
+            raft_pb2.AppendResponse.FromString,
             options,
             channel_credentials,
             insecure,

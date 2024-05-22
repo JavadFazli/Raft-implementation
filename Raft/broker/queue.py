@@ -6,8 +6,8 @@ from Raft.app.config import Config  # Import configuration settings
 class RedisQueue:
     def __init__(self, host=Config.REDIS_HOST, port=Config.REDIS_PORT, db=0):
         # Connect to the Redis server
-        # self.client = redis.Redis(host=host, port=port, db=db)
-        self.client = redis.Redis.from_url(Config.REDIS_URI)
+        self.client = redis.Redis(host=host, port=port, db=db)
+        # self.client = redis.Redis.from_url(Config.REDIS_URI)
 
     def publish(self, channel, message):
         # Publish a message to a specific Redis channel

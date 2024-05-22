@@ -28,12 +28,12 @@ message = {}
 message["kind"] = "Client"
 message["Entries"] = "Hi :)"
 redis_client.publish(channel, json.dumps(message, indent=4))
-time.sleep(1)
+time.sleep(3)
 
 # Recieve message from client (Again)
 message = {}
 message["kind"] = "Client"
-message["Entries"] = "Hi :)"
+message["Entries"] = "Second Hi :)"
 redis_client.publish(channel, json.dumps(message, indent=4))
 time.sleep(1)
 
@@ -41,7 +41,7 @@ time.sleep(1)
 message = {}
 message["kind"] = "AppendEntriesAnswer"
 message["Answer"] = "Reject"
-message["term"] = 5
+message["term"] = 0
 message["Destination_Id"] = 0
 message["id"] = 1
 redis_client.publish(channel, json.dumps(message, indent=4))

@@ -19,7 +19,7 @@ message["id"] = 1
 redis_client.publish(channel, json.dumps(message, indent=4))
 time.sleep(1)
 
-# Send Request Vote:
+# Recieve Request vote:
 message = {}
 message["kind"] = "RequestVote"
 message["term"] = 5

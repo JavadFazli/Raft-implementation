@@ -51,7 +51,8 @@ class Follower_state(State, threading.Thread):
                     return
                     
                 elif message["Prev_Log_Term"] != self.consensus.last_log_term:
-                    # TODO delete current entry
+                    self.consensus.log.delete_log_by_index(self.consensus.last_log_index)
+                    self.consensus.last_log_index -= 1
                     self.send_append_entries_answer("Reject", message["id"])
                     pass
                 
@@ -59,8 +60,8 @@ class Follower_state(State, threading.Thread):
                     self.consensus.last_log_index += 1
                     self.consensus.last_log_term = message["term"]
                     message["index"] = self.consensus.last_log_index
-                    self.send_append_entries_answer("Accept", message["id"])
                     self.consensus.log.store(message)
+                    self.send_append_entries_answer("Accept", message["id"])
     
     def receive_request_vote_answer(self, message):
         raise Exception("Receive Request Vote Answer is not valid for Follower !!!!")  
