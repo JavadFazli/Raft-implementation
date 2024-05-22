@@ -31,7 +31,7 @@ class RaftClient:
         # Call the RequestVote RPC and return the response
 
         response = self.create_stub(destination_id).RequestVote(request)
-        response_dict = MessageToDict(request, preserving_proto_field_name=True)
+        response_dict = MessageToDict(response, preserving_proto_field_name=True)
 
         return response_dict
 

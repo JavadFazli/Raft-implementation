@@ -2,7 +2,7 @@ import json
 
 import grpc
 from concurrent import futures
-import raft_pb2, raft_pb2_grpc  # Import generated gRPC files
+from Raft.rpc import raft_pb2, raft_pb2_grpc  # Import generated gRPC files
 from Raft.consensus.log import Log  # Import Log class from your project
 from Raft.app.config import (Config)
 from Raft.broker.queue import RedisQueue
@@ -32,9 +32,9 @@ class RaftServicer(raft_pb2_grpc.RaftServiceServicer):
                 # print(message['node_id'], request_dict['node_id'])
                 if message['Destination_Id'] == request_dict['id']:
                     if message['Answer'] == 'Accept':
-                        return raft_pb2.VoteResponse(vote_granted=True,term=message['term'],id=message['id'])
+                        return raft_pb2.VoteResponse(Answer='Accept',term=message['term'],id=message['id'])
                     else:
-                        return raft_pb2.VoteResponse(vote_granted=True,term=message['term'],id=message['id'])
+                        return raft_pb2.VoteResponse(Answer='Reject',term=message['term'],id=message['id'])
                     break
 
 
